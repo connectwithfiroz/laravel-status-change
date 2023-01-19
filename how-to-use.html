@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toast Message | Alert Box | connectwithfiroz</title>
+    <meta name="description" content="Beutiful Alert Box to show the alert, warning, danger .. messages.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+    <link rel="stylesheet" href="ftoast-style.css">
+</head>
+<!-- style for this page -->
+<style>
+    code, xmp {
+        background: #3d2d2d;
+        color: #fff;
+        padding: 2px;
+
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    xmp {
+        overflow: auto;
+    }
+</style>
+
+<body>
+    
+    <h2>How To Use</h2>
+    <ol>
+        <li>Add radio button input
+            <xmp>
+            <input data-id="uniques_id" data-table="table_name" class="f-toggle" type="checkbox">
+            </xmp>
+            <p>
+                <b>data-id</b> Here you've to pass the primary key value but table primary key name must be "id" ex- 1
+            </p>
+            <p>
+                <b>data-table</b> Here you've to pass the table name ex- "products"
+            </p>
+            <p>
+                <b>data-column(optional)</b> Here you've to pass the table column name which you want to toggle between true and false ex- "status" if you're table column name is status then no need to pass this data attribute
+            </p>
+            <p>
+                <b>f-toggle</b> input type must have class "f-toggle"
+            </p>
+            
+        </li>
+        <li>Add Jquery Cdn<a href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js">Jquery cdn</a>
+            <p>
+                <xmp>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                </xmp>
+            </p>
+        </li>
+        <li>Add FOllowing code after body tab
+            <xmp>
+                <script>
+                    $(function() {
+                             $('.f-toggle').change(function() {
+                             var table = $(this).data('table');
+                             var id = $(this).data('id');
+                             let url = "{{ url('/')}}" + "/update-status";
+                             url += `?table=${table}&id=${id}`;
+                             if(confirm('Are sure want to change status?')){
+                                $.ajax({
+                                   type: "GET",
+                                   dataType: "json",
+                                   url: url,
+                                   success: function(data){
+                                      console.log(data)
+                                   }
+                                });
+                             }
+                             
+                       })
+                    });
+                    </script>
+            </xmp>
+
+        </li>
+        <li>Add FOllowing code in web.php
+            <xmp>
+                Route::get('update-status', function(Request $request){
+                    if(!$request->has('table') || !$request->has('id') ){
+                        return  ["status" => false, "message" => "Id and Table is required"];
+                    }
+                    $db = DB::table($request->table);
+                    if(Schema::hasTable($request->table)){
+                        ($request->has('column'))
+                        ?$column = $request->column
+                        :$column = 'status';
+            
+                        $db = $db->where('id', $request->id);
+                        
+                        if(empty($db)){
+                            $res = ["status" => false, "message" => "No Row Found"];
+                        }else{
+                            ($request->has('status'))
+                            ?$status = $request->status
+                            :$status = ($db->first()->status) ? 0 : 1;
+                           
+                            $db->update([
+                                $column => $status
+                            ]);
+                        }
+                        
+                        $res = [ "status" => true, "message" => "Status updated"];           
+                    }else{
+                        $res = ["status" => false, "message" => "Invalid Table"];
+                    }
+                    return $res;
+                })->name('update-status');
+            </xmp>
+
+        </li>
+        
+    </ol>
+
+    <h2>Snapshot</h2>
+    <img src="toast-demo.png" alt="" style="width:100%; margin-bottom:30px;">
+</body>
+
+
+
+</html>
